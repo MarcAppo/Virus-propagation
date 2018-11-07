@@ -450,4 +450,32 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
     
     """
 
-    # TODO
+    timesteps = 300
+    valuesDict = {}
+    for numTrial in range(numTrials):
+        #creates a list of viruses needed to initiate a patient
+        viruses = []
+        for i in range(numViruses):
+            viruses.append(ResistantVirus(maxBirthProb, clearProb, resistances, mutProb))
+        #initiates a patient
+        P1 = TreatedPatient(viruses, maxPop)
+        #updates the virus population 300 times and stores results in a dict
+        for timestep in range(timesteps):
+            if numTrial == 0:
+                valuesDict[timestep] = ([],[])
+            if timestep == round(timesteps/2):
+                P1.addPrescription('guttagonol')
+            valuesDict[timestep][0].append(P1.update()) #total virus pop
+            valuesDict[timestep][1].append(P1.getResistPop(['guttagonol'])) #resistant virus pop
+    #plots results
+    totalVirusesPopValues, resistantVirusesPopValues = [], []
+    for i in range(timesteps):
+        totalVirusesPopValues.append(sum(list(valuesDict.values())[i][0])/numTrials)
+        resistantVirusesPopValues.append(sum(list(valuesDict.values())[i][1])/numTrials)
+    pylab.plot(totalVirusesPopValues, label = "Total Virus")
+    pylab.plot(resistantVirusesPopValues, label = "Guttagonol-resistant Virus")
+    pylab.title("ResistantVirus simulation")
+    pylab.xlabel("Time Steps")
+    pylab.ylabel("Average Virus Population")
+    pylab.legend(loc = "best")
+    pylab.show()
